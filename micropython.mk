@@ -4,24 +4,14 @@
 # When building Micropython, the parent directory of this file's parent directory is to be given as:
 #     make USER_C_MODULES=<path to this directory>
 
-$(shell mkdir -p $(BUILD))
-
-LVMP_DIR = $(USERMOD_DIR)/../lv_micropython_cmod
-LVMP_C = $(BUILD)/lvmp.c
-LVMP_PP = $(LVMP_C).pp
-LVMP_JSON = $(LVMP_C).json
-LVGL_DIR = $(LVMP_DIR)/lvgl
+LVMP_DIR := $(USERMOD_DIR)
+LVMP_C := $(LVMP_DIR)/generated/lvmp.c
+LVGL_DIR := $(LVMP_DIR)/lvgl
 SOURCES = $(shell find $(LVGL_DIR)/src -type f -name "*.c")
 SOURCES += $(LVMP_DIR)/lv_mem_core_micropython.c
 
-# Create lvmp.c.pp, lvmp.c.json and lvmp.c files
-$(LVMP_C): $(LVMP_DIR)/gen_mpy.py
-	$(Q)$(CPP) $(LV_CFLAGS) -E -DPYCPARSER -I $(LVMP_DIR)/pycparser/utils/fake_libc_include $(LVGL_DIR)/lvgl.h > $(LVMP_PP)
-	$(Q)$(PYTHON) $(LVMP_DIR)/gen_mpy.py -M lvgl -MP lv -MD $(LVMP_JSON) -E $(LVMP_PP) $(LVGL_DIR)/lvgl.h > $@
+$(if $(wildcard $(LVMP_C)),,$(error $(LVMP_C) not found. Run $(LVMP_DIR)/regenerate_lvmp.sh after changing lvgl, lv_conf.h, or gen_mpy.py))
 
-CFLAGS_USERMOD += -Wno-unused-function
+CFLAGS_USERMOD += -I$(LVMP_DIR) -Wno-unused-function
 SRC_USERMOD_LIB_C += $(SOURCES)
 SRC_USERMOD_C += $(LVMP_C)
-
-.PHONY: LVMP_C
-LVMP_C: $(LVMP_C)

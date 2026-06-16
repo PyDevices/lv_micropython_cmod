@@ -1,0 +1,4 @@
+shared-bindings/lvgl	__init__.c
+shared-bindings/lvgl	__init__.h
+shared-module/lvgl	__init__.c
+shared-module/lvgl	__init__.h

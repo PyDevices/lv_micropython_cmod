@@ -18,6 +18,7 @@
 #define LV_CONF_H
 
 #define LV_STDLIB_MICROPYTHON_OVERRIDE  254
+#define LV_STDLIB_CIRCUITPYTHON_OVERRIDE  253
 
 /*If you need to include anything here, do it inside the `__ASSEMBLY__` guard */
 #if  0 && defined(__ASSEMBLY__)
@@ -42,7 +43,11 @@
  * - LV_STDLIB_RTTHREAD:    RT-Thread implementation
  * - LV_STDLIB_CUSTOM:      Implement the functions externally
  */
+#if defined(CMODS_CIRCUITPYTHON_BUILD)
+#define LV_USE_STDLIB_MALLOC    LV_STDLIB_CIRCUITPYTHON_OVERRIDE
+#else
 #define LV_USE_STDLIB_MALLOC    LV_STDLIB_MICROPYTHON_OVERRIDE
+#endif
 #define LV_USE_STDLIB_STRING    LV_STDLIB_BUILTIN
 #define LV_USE_STDLIB_SPRINTF   LV_STDLIB_BUILTIN
 

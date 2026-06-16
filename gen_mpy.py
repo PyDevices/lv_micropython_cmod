@@ -1,3 +1,5 @@
+# Regression reference for compare_bindings.sh — do not use for production builds.
+# Use gen_lv_bindings.py (binding/ package) instead.
 # TODO
 # - Array conversion improvements:
 #   - return custom iterable object instead of Blob when converting to array
@@ -3825,7 +3827,22 @@ if args.metadata:
         get_enum_name(int_constant) for int_constant in int_constants
     ]
 
-    # TODO: struct functions
+    struct_functions_metadata = collections.OrderedDict()
+    for struct_name, generated in generated_structs.items():
+        if not generated:
+            continue
+        struct_funcs = get_struct_functions(struct_name)
+        if not struct_funcs:
+            continue
+        members = collections.OrderedDict()
+        for func in struct_funcs:
+            if func.name not in func_metadata:
+                continue
+            member_name = sanitize(noncommon_part(func.name, struct_name))
+            members[member_name] = func_metadata[func.name]
+        if members:
+            struct_functions_metadata[simplify_identifier(struct_name)] = members
+    metadata["struct_functions"] = struct_functions_metadata
 
     with open(args.metadata, "w") as metadata_file:
         json.dump(metadata, metadata_file, indent=4)

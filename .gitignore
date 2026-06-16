@@ -1,0 +1,9 @@
+# Generated bindings (regenerate_lvmp.sh / regenerate_lvcp.sh)
+generated/
+
+# pycparser table caches (from gcc -E / gen_lv_bindings.py)
+lextab.py
+yacctab.py
+
+__pycache__/
+*.pyc
