@@ -27,7 +27,7 @@ Firmware partition size on ESP32 CP boards is typically **~2–4 MB** for the fa
 
 **Actions before merge to main CP board:**
 
-1. After allocator-only build, note `make` output size / `idf.py size`.
+1. After first CP build with full bindings, note `make` output size / `idf.py size`.
 2. After full `lvcp.c` link, compare again; ensure partition headroom ≥ 512 KB for future growth.
 3. If tight on smaller boards later, plan `CIRCUITPY_LVGL_FULL` trim driven by `lvcp.c.json` (see `circuitpython_emit_plan.md`).
 
@@ -54,7 +54,7 @@ Both routes use the same `lv_conf.h` switch:
 | `lv_free_core` | `gc_free` | `gc_free` |
 | pools | not supported | not supported |
 
-Both ports use `gc_alloc(size, true)` for `lv_malloc_core` and `gc_realloc(..., true)` for `lv_realloc_core`. Validate during allocator-only CP build if heap asserts appear.
+Both ports use `gc_alloc(size, true)` for `lv_malloc_core` and `gc_realloc(..., true)` for `lv_realloc_core`. Validate during the first CP build if heap asserts appear.
 
 Neither port implements `lv_mem_monitor_core` (no-op).
 
@@ -62,20 +62,12 @@ Neither port implements `lv_mem_monitor_core` (no-op).
 
 ## Recommended first CP builds
 
-1. **Allocator-only** (no `lvcp.c` link):
+1. Regenerate bindings: `./lv_micropython_cmod/regenerate_lvcp.sh`
+2. Apply patches: `./lv_micropython_cmod/apply_cp_lvgl_patches.sh --apply`
+3. Build: `./build_cp_unix.sh` (unix) or future `build_cp_esp32.sh` (embedded)
+4. REPL: `import lvgl; lvgl.init()` then spot-check one widget API.
 
-   ```bash
-   make -C circuitpython/ports/espressif \
-     BOARD=espressif_esp32p4_function_ev \
-     CMODS_DIR=/path/to/cmods \
-     CMODS_LVGL_ALLOW_MISSING_BINDINGS=1
-   ```
-
-   Confirms LVGL + GC allocator + spike `lvgl.init()` compile.
-
-2. **Full bindings** (drop `CMODS_LVGL_ALLOW_MISSING_BINDINGS`, run `regenerate_lvcp.sh`, `LVGL_GENERATED_PHASE1=1` from patch script).
-
-3. REPL: `import lvgl; lvgl.init()` then spot-check one widget API.
+`circuitpython.mk` requires `generated/lvcp.c`; the build fails at make time if it is missing.
 
 Display bridge remains **ON HOLD** — no flush/tick driver in these builds yet.
 

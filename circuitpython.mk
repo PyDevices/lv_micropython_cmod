@@ -8,30 +8,36 @@
 #
 # Requires:
 #   - generated/lvcp.c (run regenerate_lvcp.sh; see verify_bindings.sh)
-#   - CIRCUITPY_LVGL=1 in the board mpconfigboard.mk (see circuitpython_board.snippet.mk)
-#
-# Optional: CMODS_LVGL_ALLOW_MISSING_BINDINGS=1 to compile LVGL + allocator without lvcp.c.
+#   - CIRCUITPY_LVGL=1 in port config (unix variant or board mpconfigboard.mk)
 
 CMODS_LVMP_DIR ?= $(CMODS_DIR)/lv_micropython_cmod
 LVGL_DIR := $(CMODS_LVMP_DIR)/lvgl
 LVCP_C := $(CMODS_LVMP_DIR)/generated/lvcp.c
 
 CMODS_LVGL_SOURCES := $(shell find $(LVGL_DIR)/src -type f -name '*.c')
+# CP coverage (and jpegio) already link lib/tjpgd; LVGL's copy uses incompatible tjpgdcnf.
+CMODS_LVGL_SOURCES := $(filter-out $(LVGL_DIR)/src/libs/tjpgd/tjpgd.c,$(CMODS_LVGL_SOURCES))
 CMODS_LV_SOURCES := $(CMODS_LVMP_DIR)/lv_mem_core_circuitpython.c
 
 ifeq ($(wildcard $(LVCP_C)),)
-ifeq ($(CMODS_LVGL_ALLOW_MISSING_BINDINGS),1)
-$(warning $(LVCP_C) not found; building LVGL library + allocator only)
-else
-$(error $(LVCP_C) not found. Run $(CMODS_LVMP_DIR)/regenerate_lvcp.sh or set CMODS_LVGL_ALLOW_MISSING_BINDINGS=1 for allocator-only spike)
+$(error $(LVCP_C) not found. Run $(CMODS_LVMP_DIR)/regenerate_lvcp.sh)
 endif
-else
 CMODS_LV_SOURCES += $(LVCP_C)
-endif
 
 # CircuitPython allocator override (see lv_conf.h + lv_mem_core_circuitpython.c)
 CFLAGS += -DCMODS_CIRCUITPYTHON_BUILD=1
-CFLAGS += -I$(CMODS_LVMP_DIR) -Wno-unused-function
+CFLAGS += -I$(CMODS_LVMP_DIR) -I$(LVGL_DIR) -Wno-unused-function
+
+# Spike module + generated bindings need LVGL headers during qstr/preprocess.
+$(BUILD)/shared-bindings/lvgl/%.o: CFLAGS += -I$(CMODS_LVMP_DIR) -I$(LVGL_DIR) -Wno-unused-const-variable
+$(BUILD)/shared-module/lvgl/%.o: CFLAGS += -I$(CMODS_LVMP_DIR) -I$(LVGL_DIR)
+
+# LVGL + generated bindings: suppress -Werror noise from upstream/generated C.
+LVGL_SUPPRESS_CFLAGS := -Wno-cast-align -Wno-nested-externs -Wno-unused-parameter \
+	-Wno-sign-compare -Wno-missing-prototypes -Wno-old-style-definition \
+	-Wno-float-conversion -Wno-double-promotion -Wno-shadow
+$(foreach _lvsrc,$(CMODS_LVGL_SOURCES),$(eval $(BUILD)/$(_lvsrc:.c=.o): CFLAGS += $(LVGL_SUPPRESS_CFLAGS)))
+$(foreach _lvsrc,$(CMODS_LV_SOURCES),$(eval $(BUILD)/$(_lvsrc:.c=.o): CFLAGS += $(LVGL_SUPPRESS_CFLAGS)))
 
 # LVGL + bindings + GC-aware allocator
 SRC_C += $(CMODS_LVGL_SOURCES) $(CMODS_LV_SOURCES)

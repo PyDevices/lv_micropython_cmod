@@ -9,7 +9,8 @@ LVGL_H="lvgl/lvgl.h"
 mkdir -p "$GENERATED"
 
 CPP="${CPP:-gcc -E}"
-LV_CFLAGS="${LV_CFLAGS:-}"
+# Match circuitpython.mk: CP build disables LVGL's bundled TJPGD (uses lib/tjpgd for jpegio).
+LV_CFLAGS="${LV_CFLAGS:--DCMODS_CIRCUITPYTHON_BUILD=1 -I$LVMP_DIR}"
 
 echo "Preprocessing $LVGL_H -> generated/lvcp.c.pp"
 $CPP $LV_CFLAGS -E -DPYCPARSER \
@@ -28,5 +29,19 @@ status=$?
 if [ "$status" -ne 0 ]; then
     exit "$status"
 fi
+
+python3 - "$GENERATED/lvcp.c" "$GENERATED/lvcp_module_globals.h" <<'PY'
+import sys
+from pathlib import Path
+
+src = Path(sys.argv[1]).read_text()
+start = src.find("#ifndef LVCP_MODULE_GLOBALS_H")
+end_marker = "#endif /* LVCP_MODULE_GLOBALS_H */"
+end = src.find(end_marker)
+if start < 0 or end < 0:
+    raise SystemExit("LVCP_MODULE_GLOBALS block not found in lvcp.c")
+end += len(end_marker)
+Path(sys.argv[2]).write_text(src[start:end] + "\n")
+PY
 
 echo "Done: $GENERATED/lvcp.c"

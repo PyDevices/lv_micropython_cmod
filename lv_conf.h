@@ -308,8 +308,8 @@
 
 /*Garbage Collector settings
  *Used if LVGL is bound to higher level language and the memory is managed by that language*/
-extern void mp_lv_init_gc();
-extern void mp_lv_deinit_gc();
+extern void mp_lv_init_gc(void);
+extern void mp_lv_deinit_gc(void);
 #define LV_GC_INIT() mp_lv_init_gc()
 #define LV_GC_DEINIT() mp_lv_deinit_gc()
 
@@ -715,7 +715,12 @@ extern void mp_lv_deinit_gc();
 
 /* JPG + split JPG decoder library.
  * Split JPG is a custom format optimized for embedded systems. */
+#if defined(CMODS_CIRCUITPYTHON_BUILD)
+/* CP already links lib/tjpgd for jpegio; incompatible tjpgdcnf vs LVGL's bundled copy. */
+#define LV_USE_TJPGD 0
+#else
 #define LV_USE_TJPGD 1
+#endif
 
 /* libjpeg-turbo decoder library.
  * Supports complete JPEG specifications and high-performance JPEG decoding. */

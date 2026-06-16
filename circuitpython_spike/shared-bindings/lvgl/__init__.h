@@ -1,5 +1,4 @@
-// This file is part of the cmods LVGL CircuitPython integration (Phase 0 spike).
-// Copy to circuitpython/shared-bindings/lvgl/__init__.h
+// Copy to circuitpython/shared-bindings/lvgl/__init.h
 
 #pragma once
 

@@ -143,7 +143,7 @@ typedef struct mp_lv_obj_type_t {{
 static const mp_lv_obj_type_t mp_lv_{base_obj}_type;
 static const mp_lv_obj_type_t *mp_lv_obj_types[];
 
-static inline const mp_obj_type_t *get_BaseObj_type()
+static inline const mp_obj_type_t *get_BaseObj_type(void)
 {{
     return mp_lv_{base_obj}_type.mp_obj_type;
 }}
@@ -331,7 +331,7 @@ static inline LV_OBJ_T *mp_get_callbacks(mp_obj_t mp_obj)
     return mp_lv_obj->callbacks;
 }
 
-static inline const mp_obj_type_t *get_BaseObj_type();
+static inline const mp_obj_type_t *get_BaseObj_type(void);
 
 static void mp_lv_delete_cb(lv_event_t * e)
 {
@@ -462,7 +462,7 @@ void *mp_lv_user_data;
 int mp_lv_roots_initialized = 0;
 int lvgl_mod_initialized = 0;
 
-void mp_lv_init_gc()
+void mp_lv_init_gc(void)
 {
     if (!MP_STATE_VM(mp_lv_roots_initialized)) {
         // mp_printf(&mp_plat_print, "[ INIT GC ]");
@@ -471,7 +471,7 @@ void mp_lv_init_gc()
     }
 }
 
-void mp_lv_deinit_gc()
+void mp_lv_deinit_gc(void)
 {
 
     // mp_printf(&mp_plat_print, "[ DEINIT GC ]");
@@ -482,6 +482,7 @@ void mp_lv_deinit_gc()
 
 }
 
+#ifndef CMODS_CIRCUITPYTHON_BUILD
 static mp_obj_t lvgl_mod___init__(void) {
     if (!MP_STATE_VM(lvgl_mod_initialized)) {
         // __init__ for builtins is called each time the module is imported,
@@ -501,6 +502,7 @@ static mp_obj_t lvgl_mod___del__(void) {
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(lvgl_mod___del___obj, lvgl_mod___del__);
+#endif /* !CMODS_CIRCUITPYTHON_BUILD */
 
 #else // LV_OBJ_T
 
@@ -1542,7 +1544,7 @@ MP_ARRAY_CONVERTOR(i64ptr, 8, true)
  * Struct {struct_name}
  */
 
-static inline const mp_obj_type_t *get_mp_{sanitized_struct_name}_type();
+static inline const mp_obj_type_t *get_mp_{sanitized_struct_name}_type(void);
 
 static inline void* mp_write_ptr_{sanitized_struct_name}(mp_obj_t self_in)
 {{
@@ -1610,7 +1612,7 @@ static MP_DEFINE_CONST_OBJ_TYPE(
     parent, &mp_lv_base_struct_type
 );
 
-static inline const mp_obj_type_t *get_mp_{sanitized_struct_name}_type()
+static inline const mp_obj_type_t *get_mp_{sanitized_struct_name}_type(void)
 {{
     return &mp_{sanitized_struct_name}_type;
 }}
@@ -2877,6 +2879,19 @@ static const mp_lv_struct_t mp_{global_name} = {{
         runtime.set_("generated_structs", generated_structs)
         runtime.set_("struct_aliases", struct_aliases)
         runtime.set_("enums", runtime.get("enums"))
+        if len(obj_names) > 0 and (_emit_max_phase is None or _emit_max_phase >= 5):
+            print(
+                """
+static const mp_lv_obj_type_t *mp_lv_obj_types[] = {{
+    {obj_types},
+    NULL
+}};
+""".format(
+                    obj_types=",\n    ".join(
+                        ["&mp_lv_%s_type" % sanitize(o) for o in obj_names]
+                    )
+                )
+            )
         finish_cp_fragment(_emit_max_phase or 7)
         return
 

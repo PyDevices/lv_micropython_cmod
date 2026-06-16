@@ -117,33 +117,43 @@ def finish_cp_fragment(max_phase):
         module_funcs=module_funcs,
     )
 
+    spike_entries = [
+        "    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_lvgl) }",
+        "    { MP_ROM_QSTR(MP_QSTR___version__), MP_ROM_QSTR(MP_QSTR_9) }",
+        "    { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&lvgl_init_obj) }",
+        "    { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&lvgl_deinit_obj) }",
+    ]
+    all_entries = spike_entries + entries
+
     print(
         """
 /*
- * CircuitPython phase-{phase} module entries.
- * Include from shared-bindings/lvgl/__init.c when LVGL_GENERATED_PHASE1 is set.
- * Object definitions live above in this file.
+ * CircuitPython module dict (generated; spike registers via MP_REGISTER_MODULE).
+ * Hand-written init/deinit callables live in shared-bindings/lvgl/__init.c.
  */
 
 #ifndef LVCP_MODULE_GLOBALS_H
 #define LVCP_MODULE_GLOBALS_H
 
-#define LVCP_MODULE_GLOBALS \\""".format(
-            phase=max_phase
-        )
-    )
+#include "py/obj.h"
 
-    if entries:
-        print(", \\\n".join(entries))
-    else:
-        print("    /* no module entries */")
+extern const mp_obj_module_t lvgl_module;
 
-    print(
-        """
 #endif /* LVCP_MODULE_GLOBALS_H */
 
-/* Backward-compatible alias for phase-1 spike templates */
-#define LVCP_PHASE1_MODULE_GLOBALS LVCP_MODULE_GLOBALS
+extern const mp_obj_fun_builtin_fixed_t lvgl_init_obj;
+extern const mp_obj_fun_builtin_fixed_t lvgl_deinit_obj;
+
+static const mp_rom_map_elem_t lvgl_module_globals_table[] = {{
+{table}
+}};
+
+static MP_DEFINE_CONST_DICT(lvgl_module_globals, lvgl_module_globals_table);
+
+const mp_obj_module_t lvgl_module = {{
+    .base = {{ &mp_type_module }},
+    .globals = (mp_obj_dict_t *)&lvgl_module_globals,
+}};
 
 const mp_rom_map_elem_t lvgl_module_entries[] = {{
 {table}
@@ -151,7 +161,7 @@ const mp_rom_map_elem_t lvgl_module_entries[] = {{
 
 const size_t lvgl_module_entry_count = sizeof(lvgl_module_entries) / sizeof(lvgl_module_entries[0]);
 """.format(
-            table=",\n".join(entries) if entries else "    /* no module entries */"
+            table=",\n".join(all_entries) if all_entries else "    /* no module entries */"
         )
     )
 

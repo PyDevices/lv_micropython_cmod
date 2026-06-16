@@ -100,7 +100,7 @@ Files in CircuitPython:
 
 - `shared-bindings/lvgl/__init__.c` — module dict, `init()`, `__version__`
 - `shared-module/lvgl/__init.c` — `void lvgl_init(void)` → `lv_init()`
-- `circuitpython.mk` included from port Makefile with `CMODS_LVGL_ALLOW_MISSING_BINDINGS=1`
+- `circuitpython.mk` included from port Makefile; requires `generated/lvcp.c`
 
 No generator output required.
 
@@ -184,8 +184,8 @@ Suggested first automated emission: **Phase 1 only** (constants), behind `--targ
 # Metadata + stub (today)
 ./lv_micropython_cmod/regenerate_lvcp.sh
 
-# Full CP firmware (once port is wired)
-CMODS_DIR=/path/to/cmods BOARD=your_board ./build_circuitpython.sh
+# Full CP unix firmware (stock or after apply_cp_lvgl_patches.sh --apply)
+./build_cp_unix.sh
 ```
 
 Output files:

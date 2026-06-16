@@ -52,9 +52,8 @@ registered via `MP_REGISTER_MODULE` in `lvcp.c`; they are spliced into the spike
 
 ### Step A — compile `lvcp.c`
 
-`circuitpython.mk` adds `$(CMODS_DIR)/lv_micropython_cmod/generated/lvcp.c` to the port build
-when `CMODS_LVGL_ALLOW_MISSING_BINDINGS` is unset. Blob/string object definitions in `lvcp.c`
-must be linked before the spike module references `&mp_<blob>`.
+`circuitpython.mk` adds `$(CMODS_DIR)/lv_micropython_cmod/generated/lvcp.c` to the port build.
+Blob/string object definitions in `lvcp.c` must be linked before the spike module references `&mp_<blob>`.
 
 ### Step B — expand the globals table
 

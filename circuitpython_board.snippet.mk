@@ -1,6 +1,14 @@
-# --- Paste/adapt into circuitpython/ when wiring the first LVGL board ---
+# --- Paste/adapt into circuitpython/ when wiring LVGL ---
 #
-# 1) Board mpconfigboard.mk  (ESP32-P4-Function-EV: ports/espressif/boards/espressif_esp32p4_function_ev/mpconfigboard.mk)
+# Default dev target: unix + coverage variant (see apply_cp_lvgl_patches.sh)
+#
+# 1a) Unix variant mpconfigvariant.mk  (ports/unix/variants/coverage/mpconfigvariant.mk)
+#
+#    CIRCUITPY_LVGL = 1
+#    CFLAGS += -DCIRCUITPY_LVGL=1
+#    CFLAGS += -DLVGL_GENERATED_PHASE1=1
+#
+# 1b) Board mpconfigboard.mk  (ESP32-P4: ports/espressif/boards/espressif_esp32p4_function_ev/mpconfigboard.mk)
 #
 #    CIRCUITPY_LVGL = 1
 #    # After regenerate_lvcp.sh and spike merge:
@@ -21,13 +29,13 @@
 #    SRC_PATTERNS += lvgl
 #    endif
 #
-# 4) ports/<port>/Makefile  (after include ../../py/circuitpy_mkenv.mk)
+# 4) ports/<port>/Makefile
+#
+#    Unix (after include ../../py/mkenv.mk):
+#    Espressif (after include ../../py/circuitpy_mkenv.mk):
 #
 #    CMODS_DIR := $(abspath ../../../cmods)    # path from port to this repo
 #    include $(CMODS_DIR)/lv_micropython_cmod/circuitpython.mk
-#
-#    # Optional allocator-only spike (skip lvcp.c link):
-#    #   make CMODS_LVGL_ALLOW_MISSING_BINDINGS=1 BOARD=...
 #
 # 5) Copy circuitpython_spike/ templates into the CP tree (circuitpython_spike/README.md)
 #
@@ -36,7 +44,7 @@
 #    shared-module/lvgl/__init.c
 #    shared-module/lvgl/__init.h
 #
-# 6) mpconfigport.h or mpconfigboard.h
+# 6) mpconfigport.h, mpconfigvariant.h, or mpconfigboard.h
 #
 #    #ifndef CIRCUITPY_LVGL
 #    #define CIRCUITPY_LVGL (0)

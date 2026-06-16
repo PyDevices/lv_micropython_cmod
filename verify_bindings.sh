@@ -40,11 +40,11 @@ if line_count < 35000 or line_count > 45000:
 if "Target: circuitpython" not in text:
     errors.append("missing Target: circuitpython banner")
 
-if "MP_REGISTER_MODULE" in text:
+if "MP_REGISTER_MODULE(" in text:
     errors.append("lvcp.c must not call MP_REGISTER_MODULE (spike module registers lvgl)")
 
-if "LVCP_MODULE_GLOBALS" not in text:
-    errors.append("missing LVCP_MODULE_GLOBALS merge macro")
+if "lvgl_module" not in text and "LVCP_MODULE_GLOBALS" not in text:
+    errors.append("missing lvgl_module export or LVCP_MODULE_GLOBALS merge macro")
 
 if "lvgl_module_entries" not in text:
     errors.append("missing lvgl_module_entries[] table")
