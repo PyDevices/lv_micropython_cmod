@@ -32,6 +32,12 @@ def _setup_display(lvgl):
     buf = lvgl.draw_buf_create(240, 240, lvgl.COLOR_FORMAT.RGB565, 0)
     disp.set_draw_buffers(buf, None)
     disp.set_render_mode(lvgl.DISPLAY_RENDER_MODE.PARTIAL)
+    return buf
+
+
+def _teardown_display(buf):
+    if buf is not None:
+        buf.destroy()
 
 
 def test_basic(lvgl):
@@ -136,12 +142,13 @@ def main():
     if lvgl.is_initialized():
         lvgl.deinit()
     test_basic(lvgl)
-    _setup_display(lvgl)
+    draw_buf = _setup_display(lvgl)
     test_widget(lvgl)
     test_event_callback(lvgl)
     test_callback_gc_with_widget_ref(lvgl)
     test_callback_gc_without_widget_ref(lvgl)
     test_button_callback(lvgl)
+    _teardown_display(draw_buf)
     lvgl.deinit()
     print("All smoke tests finished.")
     return 0

@@ -7,6 +7,8 @@
 #include "shared-bindings/lvgl/__init__.h"
 #include "generated/lvcp_module_globals.h"
 
+extern void mp_lv_deinit_gc(void);
+
 void shared_modules_lvgl_init(void);
 void shared_modules_lvgl_deinit(void);
 
@@ -30,4 +32,5 @@ void lvgl_init(void) {
 
 void lvgl_deinit(void) {
     shared_modules_lvgl_deinit();
+    mp_lv_deinit_gc();
 }

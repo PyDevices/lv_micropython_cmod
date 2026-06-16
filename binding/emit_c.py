@@ -2307,7 +2307,34 @@ static {builtin_macro}(mp_{func_obj_name}_mpobj, {param_count}, mp_{func_name}, 
                         type=lv_to_mp[return_type], cast=cast
                     )
                     func_metadata[func.name]["return_type"] = lv_mp_type[return_type]
-                print(
+                if func.name == "lv_draw_buf_destroy" and _emit_target == "circuitpython":
+                    print(
+                        """
+/*
+ * {module_name} extension definition for:
+ * {print_func}
+ */
+
+static mp_obj_t mp_{func}(size_t mp_n_args, const mp_obj_t *mp_args, void *lv_func_ptr)
+{{
+    mp_lv_struct_t *self = MP_OBJ_TO_PTR(mp_args[0]);
+    lv_draw_buf_t *buf = (lv_draw_buf_t *)self->data;
+    if (buf != NULL) {{
+        ((void (*)(lv_draw_buf_t *))lv_func_ptr)(buf);
+        self->data = NULL;
+    }}
+    return mp_const_none;
+}}
+
+ """
+                        .format(
+                            module_name=module_name,
+                            func=func.name,
+                            print_func=gen.visit(func),
+                        )
+                    )
+                else:
+                    print(
                     """
 /*
  * {module_name} extension definition for:
