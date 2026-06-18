@@ -1,12 +1,11 @@
 # This file is used by MicroPython Make-based builds such as the Unix port.
 # For CMake-based builds, see the .cmake file in the same directory.
 
-# When building Micropython, the parent directory of this file's parent directory is to be given as:
-#     make USER_C_MODULES=<path to cmods repo root>
+# When building Micropython, the parent directory of this module is given as:
+#     make USER_C_MODULES=<path to workspace root>
 
 LVMP_DIR := $(USERMOD_DIR)
-CMODS_DIR := $(abspath $(LVMP_DIR)/..)
-BINDINGS_DIR := $(CMODS_DIR)/lv_bindings
+BINDINGS_DIR ?= $(abspath $(LVMP_DIR)/../lv_bindings)
 LVMP_C := $(BINDINGS_DIR)/generated/lvmp.c
 LVGL_DIR := $(BINDINGS_DIR)/lvgl
 SOURCES = $(shell find $(LVGL_DIR)/src -type f -name "*.c")

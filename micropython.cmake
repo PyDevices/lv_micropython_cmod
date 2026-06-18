@@ -2,11 +2,13 @@
 # For Make-based builds, see the .mk file in the same directory.
 
 # When building Micropython, this file is to be given as:
-#     make USER_C_MODULES=<path to this directory>/micropython.cmake
+#     make USER_C_MODULES=<path to workspace root>/micropython.cmake
 
 set(LVMP_DIR ${CMAKE_CURRENT_LIST_DIR})
-get_filename_component(CMODS_DIR ${LVMP_DIR} DIRECTORY)
-set(BINDINGS_DIR ${CMODS_DIR}/lv_bindings)
+get_filename_component(WORKSPACE_DIR ${LVMP_DIR} DIRECTORY)
+if(NOT DEFINED BINDINGS_DIR)
+    set(BINDINGS_DIR ${WORKSPACE_DIR}/lv_bindings)
+endif()
 set(LVMP_C ${BINDINGS_DIR}/generated/lvmp.c)
 set(LVGL_DIR ${BINDINGS_DIR}/lvgl)
 file(GLOB_RECURSE SOURCES ${LVGL_DIR}/src/*.c ${LVMP_DIR}/lv_mem_core_micropython.c)
