@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regression checks for MicroPython/CircuitPython binding generation.
+# Regression checks for CircuitPython binding generation.
 # Run from repo root or lv_micropython_cmod/:  ./lv_micropython_cmod/verify_bindings.sh
 set -e
 
@@ -9,8 +9,10 @@ LVCP_C="$GENERATED/lvcp.c"
 LVCP_JSON="$GENERATED/lvcp.c.json"
 LVMP_JSON="$GENERATED/lvmp.c.json"
 
-echo "==> MicroPython generator parity (gen_mpy.py vs gen_lv_bindings.py)"
-"$LVMP_DIR/compare_bindings.sh"
+export LV_BINDINGS_DEBUG=1
+
+echo "==> Regenerate MicroPython bindings (lvmp.c + metadata)"
+"$LVMP_DIR/regenerate_lvmp.sh"
 echo
 
 echo "==> Regenerate CircuitPython bindings (lvcp.c)"

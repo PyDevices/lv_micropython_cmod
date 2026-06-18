@@ -1,6 +1,6 @@
 """Generate CircuitPython LVGL binding C source.
 
-See binding/circuitpython_emit_plan.md for phased emission and MP→CP API mapping.
+See docs/lvgl/circuitpython_emit_plan.md for phased emission and MP→CP API mapping.
 """
 
 from __future__ import print_function

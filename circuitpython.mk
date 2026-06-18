@@ -43,5 +43,5 @@ $(foreach _lvsrc,$(CMODS_LV_SOURCES),$(eval $(BUILD)/$(_lvsrc:.c=.o): CFLAGS += 
 SRC_C += $(CMODS_LVGL_SOURCES) $(CMODS_LV_SOURCES)
 
 # Hand-written module registration lives in the CP tree:
-#   shared-bindings/lvgl/__init__.c  (spike; see circuitpython_board.snippet.mk)
+#   shared-bindings/lvgl/__init__.c  (spike; see docs/lvgl/circuitpython_spike.md)
 # Generated API surface is in generated/lvcp.c; merge via LVCP_MODULE_GLOBALS in __init__.c.

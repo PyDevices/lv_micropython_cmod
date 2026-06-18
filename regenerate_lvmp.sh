@@ -11,17 +11,30 @@ mkdir -p "$GENERATED"
 CPP="${CPP:-gcc -E}"
 LV_CFLAGS="${LV_CFLAGS:-}"
 
-echo "Preprocessing $LVGL_H -> generated/lvmp.c.pp"
+PP_FILE=$(mktemp)
+trap 'rm -f "$PP_FILE"' EXIT
+
+echo "Preprocessing $LVGL_H"
 $CPP $LV_CFLAGS -E -DPYCPARSER \
     -I "$LVMP_DIR/pycparser/utils/fake_libc_include" \
-    "$LVMP_DIR/$LVGL_H" > "$GENERATED/lvmp.c.pp"
+    "$LVMP_DIR/$LVGL_H" > "$PP_FILE"
 
-echo "Generating generated/lvmp.c"
+if [ "${LV_BINDINGS_DEBUG:-0}" = 1 ]; then
+    cp "$PP_FILE" "$GENERATED/lvmp.c.pp"
+    echo "Wrote $GENERATED/lvmp.c.pp"
+fi
+
+echo "Generating $GENERATED/lvmp.c"
+METADATA_ARGS=()
+if [ "${LV_BINDINGS_DEBUG:-0}" = 1 ]; then
+    METADATA_ARGS=(-MD "$GENERATED/lvmp.c.json")
+fi
+
 python3 "$LVMP_DIR/gen_lv_bindings.py" \
     --target micropython \
     -M lvgl -MP lv \
-    -MD "$GENERATED/lvmp.c.json" \
-    -E "$GENERATED/lvmp.c.pp" \
+    "${METADATA_ARGS[@]}" \
+    -E "$PP_FILE" \
     "$LVGL_H" > "$GENERATED/lvmp.c"
 
 echo "Done: $GENERATED/lvmp.c"

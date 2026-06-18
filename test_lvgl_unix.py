@@ -5,7 +5,7 @@ Run:
   ./micropython/ports/unix/build-standard/micropython ./lv_micropython_cmod/test_lvgl_unix.py
 
 Exercises init, minimal display, widgets, event callbacks, and GC visibility
-(see binding/gc_callback_audit.md).
+(see docs/lvgl/gc_callback_audit.md).
 """
 import gc
 import sys
@@ -84,7 +84,7 @@ def test_callback_gc_with_widget_ref(lv):
     else:
         _warn(
             "callback was collected after del handler (widget still referenced); "
-            "see binding/gc_callback_audit.md"
+            "see docs/lvgl/gc_callback_audit.md"
         )
 
 
@@ -128,7 +128,7 @@ def test_callback_gc_without_widget_ref(lv):
     else:
         _warn(
             "callback lost after del widget + gc.collect(); "
-            "LVGL user_data may not keep callbacks rooted — see binding/gc_callback_audit.md"
+            "LVGL user_data may not keep callbacks rooted — see docs/lvgl/gc_callback_audit.md"
         )
 
 

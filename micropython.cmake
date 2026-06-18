@@ -10,7 +10,7 @@ set(LVGL_DIR ${LVMP_DIR}/lvgl)
 file(GLOB_RECURSE SOURCES ${LVGL_DIR}/src/*.c ${LVMP_DIR}/lv_mem_core_micropython.c)
 
 if(NOT EXISTS ${LVMP_C})
-    message(FATAL_ERROR "${LVMP_C} not found. Run ${LVMP_DIR}/regenerate_lvmp.sh after changing lvgl, lv_conf.h, or gen_mpy.py")
+    message(FATAL_ERROR "${LVMP_C} not found. Run ${LVMP_DIR}/regenerate_lvmp.sh after changing lvgl, lv_conf.h, or binding/")
 endif()
 
 add_library(lv_micropython INTERFACE)

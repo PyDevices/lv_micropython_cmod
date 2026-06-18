@@ -12,17 +12,30 @@ CPP="${CPP:-gcc -E}"
 # Match circuitpython.mk: CP build disables LVGL's bundled TJPGD (uses lib/tjpgd for jpegio).
 LV_CFLAGS="${LV_CFLAGS:--DCMODS_CIRCUITPYTHON_BUILD=1 -I$LVMP_DIR}"
 
-echo "Preprocessing $LVGL_H -> generated/lvcp.c.pp"
+PP_FILE=$(mktemp)
+trap 'rm -f "$PP_FILE"' EXIT
+
+echo "Preprocessing $LVGL_H"
 $CPP $LV_CFLAGS -E -DPYCPARSER \
     -I "$LVMP_DIR/pycparser/utils/fake_libc_include" \
-    "$LVMP_DIR/$LVGL_H" > "$GENERATED/lvcp.c.pp"
+    "$LVMP_DIR/$LVGL_H" > "$PP_FILE"
+
+if [ "${LV_BINDINGS_DEBUG:-0}" = 1 ]; then
+    cp "$PP_FILE" "$GENERATED/lvcp.c.pp"
+    echo "Wrote $GENERATED/lvcp.c.pp"
+fi
 
 echo "Running generator (--target circuitpython)"
+METADATA_ARGS=()
+if [ "${LV_BINDINGS_DEBUG:-0}" = 1 ]; then
+    METADATA_ARGS=(-MD "$GENERATED/lvcp.c.json")
+fi
+
 python3 "$LVMP_DIR/gen_lv_bindings.py" \
     --target circuitpython \
     -M lvgl -MP lv \
-    -MD "$GENERATED/lvcp.c.json" \
-    -E "$GENERATED/lvcp.c.pp" \
+    "${METADATA_ARGS[@]}" \
+    -E "$PP_FILE" \
     "$LVGL_H" > "$GENERATED/lvcp.c"
 status=$?
 
