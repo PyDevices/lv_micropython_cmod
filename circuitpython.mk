@@ -1,18 +1,19 @@
 # CircuitPython build glue for LVGL + generated bindings.
 #
 # Include from a CircuitPython port Makefile after setting CMODS_DIR to the cmods
-# repo root (the parent of lv_micropython_cmod/):
+# repo root:
 #
 #   CMODS_DIR := $(abspath ../../cmods)          # adjust relative to port dir
 #   include $(CMODS_DIR)/lv_micropython_cmod/circuitpython.mk
 #
 # Requires:
-#   - generated/lvcp.c (run regenerate_lvcp.sh; see verify_bindings.sh)
+#   - lv_bindings/generated/lvcp.c (run lv_bindings/regenerate_lvcp.sh)
 #   - CIRCUITPY_LVGL=1 in port config (unix variant or board mpconfigboard.mk)
 
 CMODS_LVMP_DIR ?= $(CMODS_DIR)/lv_micropython_cmod
-LVGL_DIR := $(CMODS_LVMP_DIR)/lvgl
-LVCP_C := $(CMODS_LVMP_DIR)/generated/lvcp.c
+CMODS_BINDINGS_DIR ?= $(CMODS_DIR)/lv_bindings
+LVGL_DIR := $(CMODS_BINDINGS_DIR)/lvgl
+LVCP_C := $(CMODS_BINDINGS_DIR)/generated/lvcp.c
 
 CMODS_LVGL_SOURCES := $(shell find $(LVGL_DIR)/src -type f -name '*.c')
 # CP coverage (and jpegio) already link lib/tjpgd; LVGL's copy uses incompatible tjpgdcnf.
@@ -20,17 +21,17 @@ CMODS_LVGL_SOURCES := $(filter-out $(LVGL_DIR)/src/libs/tjpgd/tjpgd.c,$(CMODS_LV
 CMODS_LV_SOURCES := $(CMODS_LVMP_DIR)/lv_mem_core_circuitpython.c
 
 ifeq ($(wildcard $(LVCP_C)),)
-$(error $(LVCP_C) not found. Run $(CMODS_LVMP_DIR)/regenerate_lvcp.sh)
+$(error $(LVCP_C) not found. Run $(CMODS_BINDINGS_DIR)/regenerate_lvcp.sh)
 endif
 CMODS_LV_SOURCES += $(LVCP_C)
 
 # CircuitPython allocator override (see lv_conf.h + lv_mem_core_circuitpython.c)
 CFLAGS += -DCMODS_CIRCUITPYTHON_BUILD=1
-CFLAGS += -I$(CMODS_LVMP_DIR) -I$(LVGL_DIR) -Wno-unused-function
+CFLAGS += -I$(CMODS_BINDINGS_DIR) -I$(LVGL_DIR) -Wno-unused-function
 
 # Spike module + generated bindings need LVGL headers during qstr/preprocess.
-$(BUILD)/shared-bindings/lvgl/%.o: CFLAGS += -I$(CMODS_LVMP_DIR) -I$(LVGL_DIR) -Wno-unused-const-variable
-$(BUILD)/shared-module/lvgl/%.o: CFLAGS += -I$(CMODS_LVMP_DIR) -I$(LVGL_DIR)
+$(BUILD)/shared-bindings/lvgl/%.o: CFLAGS += -I$(CMODS_BINDINGS_DIR) -I$(LVGL_DIR) -Wno-unused-const-variable
+$(BUILD)/shared-module/lvgl/%.o: CFLAGS += -I$(CMODS_BINDINGS_DIR) -I$(LVGL_DIR)
 
 # LVGL + generated bindings: suppress -Werror noise from upstream/generated C.
 LVGL_SUPPRESS_CFLAGS := -Wno-cast-align -Wno-nested-externs -Wno-unused-parameter \

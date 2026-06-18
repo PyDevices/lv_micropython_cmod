@@ -5,17 +5,19 @@
 #     make USER_C_MODULES=<path to this directory>/micropython.cmake
 
 set(LVMP_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(LVMP_C ${LVMP_DIR}/generated/lvmp.c)
-set(LVGL_DIR ${LVMP_DIR}/lvgl)
+get_filename_component(CMODS_DIR ${LVMP_DIR} DIRECTORY)
+set(BINDINGS_DIR ${CMODS_DIR}/lv_bindings)
+set(LVMP_C ${BINDINGS_DIR}/generated/lvmp.c)
+set(LVGL_DIR ${BINDINGS_DIR}/lvgl)
 file(GLOB_RECURSE SOURCES ${LVGL_DIR}/src/*.c ${LVMP_DIR}/lv_mem_core_micropython.c)
 
 if(NOT EXISTS ${LVMP_C})
-    message(FATAL_ERROR "${LVMP_C} not found. Run ${LVMP_DIR}/regenerate_lvmp.sh after changing lvgl, lv_conf.h, or binding/")
+    message(FATAL_ERROR "${LVMP_C} not found. Run ${BINDINGS_DIR}/regenerate_lvmp.sh after changing lvgl, lv_conf.h, or binding/")
 endif()
 
 add_library(lv_micropython INTERFACE)
 target_sources(lv_micropython INTERFACE ${LVMP_C})
-target_include_directories(lv_micropython INTERFACE ${LVMP_DIR})
+target_include_directories(lv_micropython INTERFACE ${BINDINGS_DIR} ${LVMP_DIR})
 target_link_libraries(usermod INTERFACE lv_micropython)
 
 add_library(lvgl INTERFACE)

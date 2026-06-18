@@ -418,7 +418,7 @@ elif [ "$APPLY" = 1 ]; then
     log "Patches applied."
     log
     log "Next:"
-    log "  $LVMP_DIR/regenerate_lvcp.sh"
+    log "  $CMODS_DIR/lv_bindings/regenerate_lvcp.sh"
     log "  ./build_cp_unix.sh"
     log "  # embedded (future): ./build_cp_esp32.sh"
 fi
