@@ -42,11 +42,11 @@ make USER_C_MODULES=../../.. BINDINGS_DIR=/path/to/lv_bindings
 ## Build (cmods wrapper)
 
 ```bash
-git clone git@github.com:PyDevices/cmods.git
+git clone https://github.com/PyDevices/cmods.git
 cd cmods
-git clone git@github.com:micropython/micropython.git micropython
-git clone git@github.com:PyDevices/lv_micropython_cmod.git lv_micropython_cmod
-git clone git@github.com:PyDevices/lv_bindings.git lv_bindings
+git clone https://github.com/micropython/micropython.git micropython
+git clone https://github.com/PyDevices/lv_micropython_cmod.git lv_micropython_cmod
+git clone https://github.com/PyDevices/lv_bindings.git lv_bindings
 cd micropython && git submodule update --init --recursive && cd ..
 ./lv_bindings/regenerate_lvmp.sh
 ./build_unix.sh
