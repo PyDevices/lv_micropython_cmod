@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""LVGL binding smoke tests for MicroPython unix port.
+"""LVGL binding smoke tests for MicroPython (unix and windows ports).
 
 Run:
+  # Unix (standard variant)
   ./micropython/ports/unix/build-standard/micropython ./lv_micropython_cmod/test_lvgl_unix.py
+
+  # Windows standard (from WSL; build with --no-os-dupterm)
+  ./micropython/ports/windows/build-standard/micropython.exe ./lv_micropython_cmod/test_lvgl_unix.py
 
 Exercises init, minimal display, widgets, event callbacks, and GC visibility
 (see docs/lvgl/gc_callback_audit.md).
