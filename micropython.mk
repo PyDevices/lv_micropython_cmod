@@ -62,7 +62,15 @@ SRC_USERMOD_C += $(LVMP_C)
 # Port Makefiles (unix/webassembly) append -Wdouble-promotion after CFLAGS_USERMOD,
 # so put the suppress on the LVGL object rules (same idea as circuitpython.mk).
 LVMP_FLOAT_CFLAGS := -Wno-double-promotion -Wno-float-conversion
+# The object name a user-module source lands under is not the same on every
+# MicroPython. Up to v1.28.0 the USER_C_MODULES prefix was stripped, so the
+# object was $(BUILD)/lvgl-bindings/lvgl/src/....o; v1.29.0 keeps the absolute
+# source path, giving $(BUILD)//home/.../lvgl-bindings/lvgl/src/....o. A rule
+# written for one names a target that does not exist on the other, the flags
+# never apply, and upstream LVGL then fails the port's -Werror=double-promotion
+# with no hint that a suppression was even attempted. Declare both spellings.
+LVMP_OBJ = $(BUILD)/$(patsubst $(USER_C_MODULES)/%,%,$(1)) $(BUILD)/$(1)
 $(foreach s,$(SOURCES),\
-	$(eval $(BUILD)/$(patsubst $(USER_C_MODULES)/%,%,$(s:.c=.o)): CFLAGS += $(LVMP_FLOAT_CFLAGS)))
-$(eval $(BUILD)/$(patsubst $(USER_C_MODULES)/%,%,$(LVMP_C:.c=.o)): CFLAGS += $(LVMP_FLOAT_CFLAGS))
-$(eval $(BUILD)/$(patsubst $(USER_C_MODULES)/%,%,$(LVMP_DIR)/src/lv_mem_core_micropython.o): CFLAGS += $(LVMP_FLOAT_CFLAGS))
+	$(eval $(call LVMP_OBJ,$(s:.c=.o)): CFLAGS += $(LVMP_FLOAT_CFLAGS)))
+$(eval $(call LVMP_OBJ,$(LVMP_C:.c=.o)): CFLAGS += $(LVMP_FLOAT_CFLAGS))
+$(eval $(call LVMP_OBJ,$(LVMP_DIR)/src/lv_mem_core_micropython.o): CFLAGS += $(LVMP_FLOAT_CFLAGS))
